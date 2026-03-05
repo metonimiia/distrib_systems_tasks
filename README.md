@@ -16,7 +16,7 @@
 1. **Подготовьте окружение**
    Убедитесь, что у вас установлен Python (версии 3.11 или выше).
    ```bash
-   python -m venv .venv && source .venv/bin/activate
+   python3 -m venv .venv && source .venv/bin/activate
    pip install -r requirements.txt
    ```
 
@@ -24,8 +24,8 @@
    В файле `students/roster.csv` найдите свою группу и ID.
    Экспортируйте их в переменные окружения, чтобы тесты знали, какой вариант проверять:
    ```bash
-   export GROUP=000
-   export STUDENT_ID=s01
+   export GROUP=332
+   export STUDENT_ID=s12
    ```
 
 3. **Запустите тесты**

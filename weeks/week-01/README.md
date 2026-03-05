@@ -13,8 +13,8 @@
 
 Перед запуском не забудьте настроить переменные:
 ```bash
-export GROUP=431  # Ваша группа
-export STUDENT_ID=s01 # Ваш ID
+export GROUP=332  # Ваша группа
+export STUDENT_ID=s12 # Ваш ID
 ```
 
 ## Что нужно сделать

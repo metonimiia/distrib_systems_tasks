@@ -9,8 +9,8 @@
 
 Не забудьте настроить переменные, если открыли новый терминал:
 ```bash
-export GROUP=431
-export STUDENT_ID=s01
+export GROUP=332
+export STUDENT_ID=s12
 ```
 
 ## Что нужно сделать

@@ -1,0 +1,35 @@
+services:
+  likes-svc-s12:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: likes-svc-s12
+    environment:
+      PORT: "8114"
+      RESOURCE_PATH: "/likes"
+      SERVICE_NAME: "likes-svc-s12"
+    expose:
+      - "8114"
+
+  other-svc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: other-svc
+    environment:
+      PORT: "8080"
+      RESOURCE_PATH: "/other"
+      SERVICE_NAME: "other-svc"
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: week-03-nginx
+    depends_on:
+      - likes-svc-s12
+      - other-svc
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
