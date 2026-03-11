@@ -1,1 +1,14 @@
-# В этом месте вам необходимо: опишите GraphQL схему
+type Review {
+  id: Int!
+  name: String!
+  rating: Int!
+}
+
+type Query {
+  reviews: [Review!]!
+  review(id: Int!): Review
+}
+
+type Mutation {
+  createReview(name: String!, rating: Int!): Review!
+}

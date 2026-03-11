@@ -1,16 +1,3 @@
-"""State machine for an orchestrated saga.
-
-Business flow for variant 332/s12:
-1. Create a review order request.
-2. Reserve moderation capacity / processing slot.
-3. Charge payment for premium review handling.
-4. Finalize the order.
-
-If payment fails, the orchestrator runs compensation:
-it keeps retrying the reservation rollback until it succeeds
-and only then moves the order to CANCELLED.
-"""
-
 STATES = {"NEW", "PAID", "DONE", "CANCELLED"}
 
 TRANSITIONS = {
@@ -24,7 +11,6 @@ TRANSITIONS = {
     },
     "DONE": {},
     "CANCELLED": {
-        # Compensation retry is idempotent: the order stays cancelled.
         "RETRY_CANCEL": "CANCELLED",
     },
 }
