@@ -1,16 +1,16 @@
 syntax = "proto3";
 
-// Опишите ваш пакет и сервис здесь
-// package example;
+package logs.v1;
 
-// service MyService {
-//   rpc MyMethod (MyRequest) returns (MyResponse);
-// }
+service LogsService {
+  rpc CreateLog (CreateLogRequest) returns (CreateLogResponse);
+}
 
-// message MyRequest {
-//   string id = 1;
-// }
+message CreateLogRequest {
+  string log = 1;
+  string level = 2;
+}
 
-// message MyResponse {
-//   string result = 1;
-// }
+message CreateLogResponse {
+  string message = 1;
+}
