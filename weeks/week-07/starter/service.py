@@ -1,12 +1,17 @@
+from pathlib import Path
 import grpc
 from concurrent import futures
+import sys
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import service_pb2
 import service_pb2_grpc
 
 
 class LogsServiceImplementation(service_pb2_grpc.LogsServiceServicer):
-
     def CreateLog(self, request, context):
         log_text = request.log
         level = request.level
