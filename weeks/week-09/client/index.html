@@ -1,2 +1,166 @@
 <!doctype html>
-<!-- В этом месте вам необходимо: реализуйте WebRTC клиент -->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebRTC chat | events-s12 | bookings-s01</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; max-width: 720px; }
+    .row { display: flex; gap: 8px; margin-bottom: 10px; }
+    input, button { padding: 8px; }
+    #log { border: 1px solid #ccc; min-height: 220px; padding: 10px; overflow-y: auto; }
+    .muted { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>WebRTC чат (Канал данных)</h1>
+  <p class="muted">Откройте страницу на 2 вкладках, имя комнат должно быть одинаково.На каждой вкладке нажимаем "Подключиться к комнате",а затем "Начать звонок".</p>
+
+  <div class="row">
+    <input id="room" value="name-room" />
+    <button id="connectBtn">Подключиться к комнате</button>
+    <button id="startBtn" disabled>Начать звонок</button>
+  </div>
+
+  <div class="row">
+    <input id="message" placeholder="Введите сообщение" style="flex: 1" />
+    <button id="sendBtn" disabled>Отправить</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const SIGNALING_URL = 'ws://127.0.0.1:8765/ws/';
+
+    let ws = null;
+    let pc = null;
+    let dataChannel = null;
+
+    const roomInput = document.getElementById('room');
+    const connectBtn = document.getElementById('connectBtn');
+    const startBtn = document.getElementById('startBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('message');
+    const logDiv = document.getElementById('log');
+
+    function log(text) {
+      const line = document.createElement('div');
+      line.textContent = text;
+      logDiv.appendChild(line);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function sendSignal(payload) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      ws.send(JSON.stringify(payload));
+    }
+
+    function createPeerConnection() {
+      pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      });
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendSignal({ type: 'candidate', candidate: event.candidate });
+        }
+      };
+
+      pc.onconnectionstatechange = () => {
+        log('Состояние P2P: ' + pc.connectionState);
+      };
+
+      pc.ondatachannel = (event) => {
+        setupDataChannel(event.channel);
+      };
+    }
+
+    function setupDataChannel(channel) {
+      dataChannel = channel;
+
+      dataChannel.onopen = () => {
+        log('Канал данных открыт. Можно отправлять сообщения.');
+        sendBtn.disabled = false;
+      };
+
+      dataChannel.onmessage = (event) => {
+        log('Друг: ' + event.data);
+      };
+
+      dataChannel.onclose = () => {
+        log('DataChannel закрыт.');
+        sendBtn.disabled = true;
+      };
+    }
+
+    connectBtn.onclick = () => {
+      const room = roomInput.value.trim();
+      if (!room) return;
+
+      ws = new WebSocket(SIGNALING_URL + encodeURIComponent(room));
+
+      ws.onopen = () => {
+        log('Подключено к signaling-серверу.');
+        startBtn.disabled = false;
+      };
+
+      ws.onmessage = async (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (!pc) {
+          createPeerConnection();
+        }
+
+        if (msg.type === 'offer') {
+          await pc.setRemoteDescription(msg.offer);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sendSignal({ type: 'answer', answer });
+          log('Получен запрос, отправлен ответ.');
+        }
+
+        if (msg.type === 'answer') {
+          await pc.setRemoteDescription(msg.answer);
+          log('Получен ответ, P2P соединение почти готово.');
+        }
+
+        if (msg.type === 'candidate' && msg.candidate) {
+          try {
+            await pc.addIceCandidate(msg.candidate);
+          } catch (e) {
+            log('Ошибка ICE candidate: ' + e.message);
+          }
+        }
+      };
+
+      ws.onclose = () => {
+        log('Соединение закрыто.');
+        startBtn.disabled = true;
+      };
+    };
+
+    startBtn.onclick = async () => {
+      if (!pc) {
+        createPeerConnection();
+      }
+
+      const channel = pc.createDataChannel('chat');
+      setupDataChannel(channel);
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      sendSignal({ type: 'offer', offer });
+      log('Отправлен запрос. Ждём ответ...');
+    };
+
+    sendBtn.onclick = () => {
+      const text = messageInput.value.trim();
+      if (!text || !dataChannel || dataChannel.readyState !== 'open') return;
+
+      dataChannel.send(text);
+      log('Я: ' + text);
+      messageInput.value = '';
+    };
+  </script>
+</body>
+</html>
