@@ -1,1 +1,12 @@
-# В этом месте вам необходимо: Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications-svc-s12
+spec:
+  selector:
+    app: notifications-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8211
+  type: ClusterIP

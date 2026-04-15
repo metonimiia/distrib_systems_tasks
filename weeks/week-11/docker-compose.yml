@@ -1,22 +1,43 @@
-version: '3.9'
 services:
-  app:
-    # Замените на имя образа
-    image: primer/obraz
+  bookings-svc-s12:
+    build: ../week-10
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8273/').read()",
+        ]
       interval: 10s
       timeout: 3s
       retries: 3
     networks:
       - app-net
-  gateway:
-    # Замените на имя образа
-    image: primer/obraz
-    depends_on:
-      - app
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - app-net
+
+  gateway:
+    image: nginx:alpine
+    depends_on:
+      bookings-svc-s12:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    networks:
+      - app-net
+
 networks:
   app-net:
     driver: bridge
