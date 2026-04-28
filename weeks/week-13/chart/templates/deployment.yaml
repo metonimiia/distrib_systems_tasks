@@ -15,10 +15,12 @@ spec:
         app: {{ .Chart.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.containerName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: {{ .Values.service.port }}
           env:
             - name: APP_PORT
               value: "{{ .Values.service.port }}"
+          resources:
+{{ toYaml .Values.resources | nindent 12 }}

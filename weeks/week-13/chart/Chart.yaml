@@ -1,5 +1,5 @@
 apiVersion: v2
-name: zamenite-na-k8s-app
+name: orders-app
 description: Пример чарта
 type: application
 version: 0.1.0

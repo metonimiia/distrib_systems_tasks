@@ -8,10 +8,10 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     env:
-      WEEK: "01"
-      GROUP: "431"
-      STUDENT_ID: "s01"
-      IMAGE_NAME: "В этом месте вам необходимо"
+      WEEK: "14"
+      GROUP: "332"
+      STUDENT_ID: "s12"
+      IMAGE_NAME: "devices-s12"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,14 +22,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8
       - name: Линтер (необязательно)
         run: |
-          echo "В этом месте вам необходимо: добавить шаг линтера (ruff/flake8)"
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Запуск тестов
         run: make test WEEK=${{ env.WEEK }}
+      - name: Настройка Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Сборка Docker-образа
         run: |
-          docker build -t $IMAGE_NAME -f weeks/week-10/Dockerfile weeks/week-10
+          docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:latest -f weeks/week-10/Dockerfile weeks/week-10
       - name: Подготовка артефактов
         run: |
           mkdir -p artifacts

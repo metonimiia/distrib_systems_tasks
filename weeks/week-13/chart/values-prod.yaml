@@ -1,6 +1,15 @@
 replicaCount: 3
+containerName: orders-container
 image:
-  repository: primer/obraz
+  repository: orders-s12
   tag: "prod"
 service:
-  port: 8000
+  name: orders-svc-s12
+  port: 8282
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
