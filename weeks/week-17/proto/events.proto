@@ -1,0 +1,30 @@
+// Указываем версию синтаксиса Protocol Buffers (современный стандарт)
+syntax = "proto3";
+
+// Пространство имен, чтобы избежать конфликтов имен при генерации кода
+package events.v1;
+
+// Описание интерфейса нашего gRPC сервиса (какие методы он поддерживает)
+service EventsService {
+  // Метод для получения всех событий. 
+  rpc GetEvents (Empty) returns (EventList);
+  
+  // Метод для создания события
+  rpc CreateEvent (Event) returns (Event);
+}
+
+//Пустое сообщение-заглушка для методов, которым не нужны входные параметры
+message Empty {}
+
+//Структура данных (модель) для одного события
+message Event {
+  string id = 1;      
+  string name = 2;     
+  string location = 3;
+}
+
+//Структура данных для передачи списка событий
+message EventList {
+  //Ключевое слово 'repeated' означает, что это будет массив (список) объектов Event
+  repeated Event events = 1;
+}

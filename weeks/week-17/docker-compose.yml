@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  events-svc-s12:
+    build:
+      context: .
+      dockerfile: events-svc/Dockerfile
+    ports:
+      - "8257:8257"
+    environment:
+      - PORT=8257
+    networks:
+      - events-net
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - EVENTS_SVC_HOST=events-svc-s12:8257
+    depends_on:
+      - events-svc-s12
+    networks:
+      - events-net
+
+networks:
+  events-net:
+    driver: bridge
