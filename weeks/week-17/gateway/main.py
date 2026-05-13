@@ -51,3 +51,4 @@ def create_event(event: EventModel):
     except Exception as e:
         logger.error(f"Ошибка при вызове gRPC сервиса: {e}")
         raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+    
